@@ -1,0 +1,54 @@
+---
+title: "PA1_template.md"
+author: "Bill Su"
+date: "April 19, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Loading and preprocessing the data
+
+```{r}
+activity <- read.csv("~/Downloads/activity.csv")
+```
+
+What is the mean total number of steps taken per day?
+Mean and Median of all days are calculated at the end. 
+```{r}
+sum(activity[,"steps"],na.rm = TRUE)
+group <- aggregate(activity$steps, by = list(activity$date), FUN = mean)
+hist(group$x, xlab = "Date")
+mean(group$x,na.rm=TRUE)
+median(group$x, na.rm=TRUE)
+```
+
+What is the average daily activity pattern?
+```{r}
+interval <- aggregate(activity$steps, by = list(activity$interval), FUN = mean,na.rm=TRUE)
+interval <- ts(interval, frequency = 5)
+plot(interval)
+max(interval[,"x"])
+interval[max(interval[,"x"]),]
+```
+
+Imputing Missing Values
+```{r}
+length(activity[is.na(activity)])
+activity2 <- activity
+activity2$steps[is.na(activity2$steps)] = mean(activity2$steps, na.rm=TRUE)
+group2 <- aggregate(activity2$steps, by = list(activity2$date), FUN = mean)
+hist(group2$x, xlab = "Date")
+```
+
+Weekday or weekends (graph reflects steps during the weekdays)
+```{r}
+activity2$weekday <- weekdays(as.Date(activity2$date))
+activity2$weekdays <- ifelse(activity2$weekday == "Sunday" | activity2$weekday == "Saturday","Weekend", "Weekday")
+activity3 <- activity2[which(activity2$weekdays == "Weekday"),]
+interval2 <- aggregate(activity3$steps, by = list(activity3$interval), FUN = mean,na.rm=TRUE)
+interval2 <- ts(interval2, frequency = 5)
+plot(interval2)
+```
